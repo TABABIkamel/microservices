@@ -1,0 +1,48 @@
+version: "3.7"
+services:
+  candidate:
+    build: C:\Users\TB kml\Documents\workspace-sts-3.8.4.RELEASE\MS-condidat
+    ports:
+      - "8085:8085"
+    image: "candidatmss"
+    networks:
+      - test-net
+    depends_on:
+      - Euruka
+  mysql-standalone:
+    image: mysql:5.6
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=test
+      - MYSQL_USER=sa
+      - MYSQL_PASSWORD=password
+    ports:
+      - 3306:3306
+    networks:
+      - test-net
+  terrain:
+    image: mstterrain
+    ports:
+      - 8086:8086
+    restart: always
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    networks: 
+      - test-net
+    depends_on:
+      - Euruka
+      - mysql-standalone
+  Euruka:
+    build: C:\Users\TB kml\eclipse-workspace\Eureka
+    ports:
+      - "8761:8761"
+    image: "eurekaserver"
+    networks:
+      - test-net
+      
+      
+networks:
+  test-net:
+    
+    

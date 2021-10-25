@@ -1,0 +1,64 @@
+version: "2.4"
+services:
+  terrainnms:
+    build: C:\Users\TB kml\eclipse-workspace\MS-terraiin
+    ports:
+      - "8074:8074"
+    image: "terrainlm"
+    networks:
+      - test-net
+    depends_on:
+      - Euruka
+  zuul:
+    image: "zuullmsss"
+    build: C:\Users\TB kml\Desktop\Zuul-Gateway
+    ports:
+      - "8093:8093"
+    networks:
+      - test-net
+    restart: unless-stopped
+    depends_on:
+      - Euruka
+  mysql-standalone:
+    image: mysql:5.6
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=test
+      - MYSQL_USER=sa
+      - MYSQL_PASSWORD=password
+    ports:
+      - 3306:3306
+    volumes:
+      - .m2:/root/.m2
+    stdin_open: true
+    tty: true
+  terrain:
+    image: mstterrainn
+    ports:
+      - 8086:8086
+    restart: unless-stopped
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql-standalone
+    environment:
+     EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://192.168.1.11:8761/eureka   
+     SPRING_APPLICATION_JSON: '{
+          "spring.datasource.url"  : "jdbc:mysql://mysql-standalone:3306/test?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC",
+          "spring.datasource.username" : "sa",
+          "spring.datasource.password" : "password",
+          "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL5InnoDBDialect",
+          "spring.jpa.hibernate.ddl-auto" : "update"
+        }' 
+  Euruka:
+    build: C:\Users\TB kml\eclipse-workspace\Eureka
+    ports:
+      - "8761:8761"
+    image: "eurekaserver"
+    networks:
+      - test-net  
+networks:
+  test-net:
+    
+    
